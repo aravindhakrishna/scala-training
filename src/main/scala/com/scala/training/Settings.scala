@@ -8,6 +8,7 @@ class Settings(config:Config){
   def dbPort=config.getInt("port")
   def dbName=config.getString("db.name")
   def dbUrl=config.getString("db.url")
+  def dbTable=config.getString("db.tableName")
   def conf=config
 }
 object Settings {
