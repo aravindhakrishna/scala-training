@@ -2,8 +2,7 @@ package com.scala.training
 
 import com.mongodb.casbah.{MongoClient, MongoClientURI}
 import com.novus.salat.global._
-import com.scala.training.domain.Student
-import com.scala.training.repo.{MongoStudentRepo, StudentRepoT}
+import com.scala.training.repo.{MongoStudentRepo, StudentRepoT,Student}
 import com.scala.training.utils.BootstrapEmbeddedMongo
 
 

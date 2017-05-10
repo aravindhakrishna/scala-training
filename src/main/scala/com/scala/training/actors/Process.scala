@@ -7,7 +7,7 @@ import akka.util.Timeout
 import com.mongodb.casbah.MongoClient
 import org.bson.types.ObjectId
 import com.scala.training.domain._
-import com.scala.training.repo.MongoStudentRepo
+import com.scala.training.repo.{MongoStudentRepo, Student}
 
 import scala.concurrent.ExecutionContext
 

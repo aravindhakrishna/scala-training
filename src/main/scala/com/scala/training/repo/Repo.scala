@@ -2,8 +2,16 @@ package com.scala.training.repo
 
 import com.mongodb.casbah.MongoClient
 import com.novus.salat.Context
+import com.novus.salat.annotations.Key
 import com.scala.training.domain._
+import org.bson.types.ObjectId
 
+
+case class Student(@Key("_id") id:String=ObjectId.get().toString,
+                   name:String,
+                   age:Int,
+                   bloodGroup:String,
+                   position:String)
 
 trait StudentRepoT extends Repository{
   type Id =String
