@@ -2,10 +2,12 @@ package com.scala.training
 
 import akka.actor.{ActorSystem, Props}
 import com.mongodb.casbah.{MongoClient, MongoClientURI}
-import com.scala.training.actors.{ProcessActor, RepoActor}
+import com.scala.training.actors.{ProcessActor}
+import com.scala.training.repo.MongoStudentRepo
 import com.scala.training.utils.BootstrapEmbeddedMongo
 import com.typesafe.config.ConfigFactory
 
+import com.novus.salat.global._
 import scala.io.StdIn
 
 
@@ -21,7 +23,7 @@ object Main extends App with BootstrapEmbeddedMongo{
   startupMongo()
 
   mongoClient=MongoClient(MongoClientURI(settings.dbUrl))
-  val studentRepo=system.actorOf(Props(new RepoActor(mongoClient)),"student-com.scala.training.repo")
+  val studentRepo=new MongoStudentRepo(mongoClient,DBName,settings.dbTable)
   val processRepo =system.actorOf(Props(new ProcessActor(studentRepo)(system.dispatcher)),"process-actor")
 
   while (true){
@@ -31,6 +33,7 @@ object Main extends App with BootstrapEmbeddedMongo{
       case "4"=>processRepo ! "4"
       case "5"=>processRepo ! "5"
       case "6"=>processRepo ! "6"
+      case "7"=> processRepo ! "student"
       case _=> sys.exit(0)
     }
   }
