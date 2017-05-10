@@ -1,7 +1,7 @@
 package com.scala.training.actors
 
 
-import akka.actor.SupervisorStrategy.{Stop, Restart}
+import akka.actor.SupervisorStrategy.{Resume, Stop, Restart}
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
@@ -22,7 +22,7 @@ class ProcessActor(studentRepo:StudentRepoT)(implicit val exe:ExecutionContext) 
 
   val second=Student(name = "yyy",age = 25,bloodGroup = "AB+",position = "BE")
 
-  def studentActor=context.child("student-repo").get
+  def studentActor=context.child("student-repo").getOrElse(context.system.deadLetters)
 
 
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy(maxNrOfRetries = 3){
