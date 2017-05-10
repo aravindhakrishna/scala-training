@@ -1,7 +1,9 @@
+package repo
+
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.commons.MongoDBObject
 import com.novus.salat.dao.SalatDAO
-import com.novus.salat.{ Context, grater }
+import com.novus.salat.{Context, grater}
 
 import scala.collection.immutable.Seq
 import scala.reflect.runtime.universe.typeOf

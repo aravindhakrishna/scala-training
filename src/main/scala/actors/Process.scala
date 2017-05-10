@@ -1,11 +1,15 @@
+package actors
+
 
 import akka.actor._
-import org.bson.types.ObjectId
 import akka.pattern.ask
 import akka.util.Timeout
+import com.mongodb.casbah.MongoClient
+import org.bson.types.ObjectId
+import domain._
+import repo.MongoStudentRepo
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.Duration
 
 class ProcessActor(studentRepo:ActorRef)(implicit val exe:ExecutionContext) extends Actor{
 
@@ -24,4 +28,35 @@ class ProcessActor(studentRepo:ActorRef)(implicit val exe:ExecutionContext) exte
      case Results(data)=> data.foreach(println(_))
      case _=>
    }
+}
+
+class RepoActor(mongoClient:MongoClient) extends Actor{
+
+  import com.novus.salat.global._
+  var repo:MongoStudentRepo=_
+
+
+  override def preStart(): Unit = {
+    repo=new MongoStudentRepo(mongoClient,"test","student")
+  }
+
+
+  def receive ={
+    case Insert(student)=>
+      repo.insert(student)
+      println("Inserted")
+    case GetById(id) =>
+      repo.get(id) match {
+        case Some(data)=> sender() ! data
+        case None=> sender() ! "No Match Found"
+      }
+      println("sent data")
+    case DeleteById(id) =>repo.delete(id)
+
+    case  "all"=> sender() ! repo.getAll.toList
+      println("sent")
+
+
+    case _=>
+  }
 }

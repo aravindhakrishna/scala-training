@@ -2,6 +2,9 @@ import java.util.UUID
 
 import com.novus.salat.global._
 import com.mongodb.casbah.{MongoClient, MongoClientURI}
+import repo.{MongoStudentRepo, StudentRepoT}
+import domain._
+import utils.BootstrapEmbeddedMongo
 
 
 object Training extends MongoRepo with App{

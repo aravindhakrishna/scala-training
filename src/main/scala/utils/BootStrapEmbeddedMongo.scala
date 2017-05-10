@@ -1,20 +1,19 @@
+package utils
 
-import com.mongodb.casbah.MongoConnection
+
+import java.util.UUID
+
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.TypeImports._
-
-import de.flapdoodle.embed.mongo.{ MongodProcess, MongodExecutable, MongodStarter }
-import de.flapdoodle.embed.mongo.config.{MongoCmdOptionsBuilder, Net, MongodConfigBuilder, RuntimeConfigBuilder}
+import de.flapdoodle.embed.mongo.config.{MongoCmdOptionsBuilder, MongodConfigBuilder, Net, RuntimeConfigBuilder}
 import de.flapdoodle.embed.mongo.distribution.Version
+import de.flapdoodle.embed.mongo.{Command, MongodExecutable, MongodProcess, MongodStarter}
 import de.flapdoodle.embed.process.config.io.ProcessOutput
-import de.flapdoodle.embed.process.io.{ NullProcessor, Processors }
+import de.flapdoodle.embed.process.io.{NullProcessor, Processors}
 import de.flapdoodle.embed.process.runtime.Network
 
 import scala.concurrent._
 import scala.concurrent.duration._
-import de.flapdoodle.embed.mongo.Command
-
-import java.util.UUID
 
 trait BootstrapEmbeddedMongo extends TestSupport {
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
@@ -91,6 +90,7 @@ trait BootstrapEmbeddedMongo extends TestSupport {
 }
 
 import java.util.concurrent.TimeUnit
+
 import scala.concurrent.duration._
 
 class TestTimeoutException(description: String, elapsed: Double, nestedException: Throwable) extends Exception(
