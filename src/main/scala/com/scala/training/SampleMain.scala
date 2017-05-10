@@ -2,8 +2,10 @@ package com.scala.training
 
 import com.mongodb.casbah.{MongoClient, MongoClientURI}
 import com.novus.salat.global._
-import com.scala.training.repo.{MongoStudentRepo, StudentRepoT,Student}
+import com.scala.training.repo.{MongoStudentRepo, Student, StudentRepoT}
 import com.scala.training.utils.BootstrapEmbeddedMongo
+
+import scala.io.StdIn
 
 
 object SampleMain extends MongoRepo with App
@@ -18,7 +20,7 @@ abstract class MongoRepo  extends BootstrapEmbeddedMongo{
   def DBName="student"
   var repo:StudentRepoT=_
   while (true){
-    readLine() match {
+    StdIn.readLine()  match {
       case "1"=>startupMongo()
         mongoClient=MongoClient(MongoClientURI(buildMongoUri))
         repo=new MongoStudentRepo(mongoClient,"test","student")
