@@ -1,8 +1,8 @@
-package repo
+package com.scala.training.repo
 
 import com.mongodb.casbah.MongoClient
 import com.novus.salat.Context
-import domain._
+import com.scala.training.domain._
 
 
 trait StudentRepoT extends Repository{

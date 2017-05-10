@@ -1,10 +1,10 @@
-import java.util.UUID
+package com.scala.training
 
-import com.novus.salat.global._
 import com.mongodb.casbah.{MongoClient, MongoClientURI}
-import repo.{MongoStudentRepo, StudentRepoT}
-import domain._
-import utils.BootstrapEmbeddedMongo
+import com.novus.salat.global._
+import com.scala.training.domain.Student
+import com.scala.training.repo.{MongoStudentRepo, StudentRepoT}
+import com.scala.training.utils.BootstrapEmbeddedMongo
 
 
 object SampleMain extends MongoRepo with App

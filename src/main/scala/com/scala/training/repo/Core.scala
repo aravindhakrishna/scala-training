@@ -1,4 +1,4 @@
-package repo
+package com.scala.training.repo
 
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.commons.MongoDBObject
@@ -10,7 +10,7 @@ import scala.reflect.runtime.universe.typeOf
 
 trait Repository {
   type Id <: AnyRef //Entity's unique identifier (e.g. UUID). May be a tuple or case class in the case of compound primary keys
-  type Entity <: AnyRef //Business domain object with a unique identifier
+  type Entity <: AnyRef //Business com.scala.training.domain object with a unique identifier
   type PartialEntity <: AnyRef //Container of entity fields that need updating. Usually a case class mimicking the entity but with all optional fields
 
   def id(entity: Entity): Id //Extracts entity's id for usage in queries

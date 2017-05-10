@@ -1,4 +1,4 @@
-package actors
+package com.scala.training.actors
 
 
 import akka.actor._
@@ -6,8 +6,8 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.mongodb.casbah.MongoClient
 import org.bson.types.ObjectId
-import domain._
-import repo.MongoStudentRepo
+import com.scala.training.domain._
+import com.scala.training.repo.MongoStudentRepo
 
 import scala.concurrent.ExecutionContext
 

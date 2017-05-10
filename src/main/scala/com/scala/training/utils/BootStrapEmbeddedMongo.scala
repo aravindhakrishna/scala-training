@@ -1,4 +1,4 @@
-package utils
+package com.scala.training.utils
 
 
 import java.util.UUID

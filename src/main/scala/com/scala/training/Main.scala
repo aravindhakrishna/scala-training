@@ -1,13 +1,12 @@
-import actors.ProcessActor
+package com.scala.training
+
 import akka.actor.{ActorSystem, Props}
 import com.mongodb.casbah.{MongoClient, MongoClientURI}
+import com.scala.training.actors.{ProcessActor, RepoActor}
+import com.scala.training.utils.BootstrapEmbeddedMongo
 import com.typesafe.config.ConfigFactory
-import actors.RepoActor
-import utils.BootstrapEmbeddedMongo
 
-/**
-  * Created by scala on 5/8/17.
-  */
+
 object Main extends App with BootstrapEmbeddedMongo{
 
   val config=ConfigFactory.load().getConfig("student")
@@ -20,7 +19,7 @@ object Main extends App with BootstrapEmbeddedMongo{
   startupMongo()
 
   mongoClient=MongoClient(MongoClientURI(config.getString("db.url")))
-  val studentRepo=system.actorOf(Props(new RepoActor(mongoClient)),"student-repo")
+  val studentRepo=system.actorOf(Props(new RepoActor(mongoClient)),"student-com.scala.training.repo")
   val processRepo =system.actorOf(Props(new ProcessActor(studentRepo)(system.dispatcher)),"process-actor")
 
   while (true){
