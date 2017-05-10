@@ -8,7 +8,7 @@ import utils.BootstrapEmbeddedMongo
 /**
   * Created by scala on 5/8/17.
   */
-object ActorTrigger extends App with BootstrapEmbeddedMongo{
+object Main extends App with BootstrapEmbeddedMongo{
 
   val config=ConfigFactory.load().getConfig("student")
 

@@ -7,13 +7,10 @@ import domain._
 import utils.BootstrapEmbeddedMongo
 
 
-object Training extends MongoRepo with App{
-  println("test")
-
-}
-
+object SampleMain extends MongoRepo with App
 
 abstract class MongoRepo  extends BootstrapEmbeddedMongo{
+  println("Sample Main Process")
   def buildMongoUri: String = {
     s"mongodb://10.0.2.15:27017/test"
   }
