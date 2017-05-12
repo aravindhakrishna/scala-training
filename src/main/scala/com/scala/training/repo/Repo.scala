@@ -7,11 +7,11 @@ import com.scala.training.domain._
 import org.bson.types.ObjectId
 
 
-case class Student(@Key("_id") id:String=ObjectId.get().toString,
+case class Student (@Key("_id") id:String=ObjectId.get().toString,
                    name:String,
                    age:Int,
                    bloodGroup:String,
-                   position:String)
+                   position:String)extends Model
 
 trait StudentRepoT extends Repository{
   type Id =String
