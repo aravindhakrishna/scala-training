@@ -20,7 +20,6 @@ class WebServiceActor(host:String,port:Int,studentRepoT: StudentRepoT) extends H
   def startStudent=context.actorOf(Props(new RepoActor(studentRepoT)),"student-repo")
 
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy(maxNrOfRetries = 3){
-    case _:MongoException=>Restart
     case _:Exception=>Restart
   }
 
