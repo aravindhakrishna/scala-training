@@ -24,6 +24,8 @@ trait RestRoute extends Directives with HttpServiceBase with PlayJsonSupport{
 
   val second=Student(name = "yyy",age = 25,bloodGroup = "AB+",position = "BE")
 
+  def third=Student(name = "y"+uuid.codePointCount(3,10),age = 25,bloodGroup = "AB+",position = "BE")
+
   def studentActor(context:ActorContext)=context.child("student-repo").getOrElse(context.system.deadLetters)
 
   def testRoute(context:ActorContext)(implicit executionContext: ExecutionContext) =  (pathPrefix("test")){
@@ -39,13 +41,27 @@ trait RestRoute extends Directives with HttpServiceBase with PlayJsonSupport{
               case "3"=>Future {
                 (studentActor(context) ? "all").mapTo[List[Student]].onComplete {
                   case Success(data) => ctx complete(StatusCodes.OK,data)
-                  case Failure(err) => ctx complete(StatusCodes.OK, "Non Matched")
+                  case Failure(err) => ctx complete(StatusCodes.OK, "Empty")
+                }
+              }
+              case "4"=>Future {
+                (studentActor(context) ? GetById(uuid)).mapTo[Student].onComplete {
+                  case Success(data) => ctx complete(StatusCodes.OK,data)
+                  case Failure(err) => ctx complete(StatusCodes.OK, "Not Matched")
                 }
               }
               case "5"=>studentActor(context) ! DeleteById(first.id)
                 ctx complete(StatusCodes.OK,"Deleted")
               case "6"=>studentActor(context) ! Insert(second)
                 ctx complete(StatusCodes.OK,"Inserted")
+              case "7"=>studentActor(context) ! Insert(third)
+                ctx complete(StatusCodes.OK,"Inserted")
+              case (x)=>Future {
+                (studentActor(context) ? GetById(x)).mapTo[Student].onComplete {
+                  case Success(data) => ctx complete(StatusCodes.OK,data)
+                  case Failure(err) => ctx complete(StatusCodes.OK, "Not Matched")
+                }
+              }
             }
       }
     }

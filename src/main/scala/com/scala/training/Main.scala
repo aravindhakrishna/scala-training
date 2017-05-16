@@ -2,7 +2,7 @@ package com.scala.training
 
 import akka.actor.{ActorSystem, Props}
 import com.mongodb.casbah.{MongoClient, MongoClientURI}
-import com.scala.training.actors.{WebServiceActor, ProcessActor}
+import com.scala.training.actors.{WebServiceActor}
 import com.scala.training.repo.MongoStudentRepo
 import com.scala.training.utils.BootstrapEmbeddedMongo
 import com.typesafe.config.ConfigFactory
