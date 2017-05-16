@@ -16,6 +16,5 @@ libraryDependencies ++=Seq(
   "io.spray"                   %% "spray-http"                             % "1.3.3"                % Compile,
   "io.spray"                   %% "spray-routing"                          % "1.3.3"                % Compile,
   "io.spray"                   %% "spray-httpx"                            % "1.3.3"                % Compile,
-  "io.spray"                   %% "spray-httpx"                            % "1.3.3"                % Compile,
   "com.typesafe.play"          %% "play-json"                              % "2.3.10"             % Compile
 )
