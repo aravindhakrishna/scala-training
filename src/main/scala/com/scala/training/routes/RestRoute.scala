@@ -18,44 +18,35 @@ import scala.util.{Failure, Success}
 trait RestRoute extends Directives with HttpServiceBase with PlayJsonSupport{
   implicit val timeout=Timeout(5000L)
   implicit val _marshall=Json.writes[Student]
-  val uuid=ObjectId.get().toString
-
-  val first=Student(id=uuid ,name = "xxx",age = 25,bloodGroup = "AB+",position = "BE")
-
-  val second=Student(name = "yyy",age = 25,bloodGroup = "AB+",position = "BE")
-
-  def third=Student(name = "y"+uuid.codePointCount(3,10),age = 25,bloodGroup = "AB+",position = "BE")
+  implicit val _unmarshall=Json.reads[Student]
 
   def studentActor(context:ActorContext)=context.child("student-repo").getOrElse(context.system.deadLetters)
 
-  def testRoute(context:ActorContext)(implicit executionContext: ExecutionContext) =  (pathPrefix("test")){
+  def testRoute(context:ActorContext)(implicit executionContext: ExecutionContext) =  (pathPrefix("rest")){
     pathEndOrSingleSlash{
      get{
        complete(StatusCodes.OK,"hello")
       }
-    } ~  pathPrefix("rest"/Segment){input=>
+    } ~  pathPrefix("student"){
+      pathEndOrSingleSlash{
+        entity(as[Student]){data=>
+          post{ctx=>
+            studentActor(context) ! Insert(data.copy(id=ObjectId.get().toString))
+            ctx.complete(StatusCodes.OK,"Inserted")
+          }
+
+        }
+      }
+
+    } ~  pathPrefix("student"/Segment){input=>
       get{ctx=>
             input match {
-              case "2"=> studentActor(context) ! Insert(first)
-                ctx complete(StatusCodes.OK,"Inserted")
-              case "3"=>Future {
+              case "all"=>Future {
                 (studentActor(context) ? "all").mapTo[List[Student]].onComplete {
                   case Success(data) => ctx complete(StatusCodes.OK,data)
                   case Failure(err) => ctx complete(StatusCodes.OK, "Empty")
                 }
               }
-              case "4"=>Future {
-                (studentActor(context) ? GetById(uuid)).mapTo[Student].onComplete {
-                  case Success(data) => ctx complete(StatusCodes.OK,data)
-                  case Failure(err) => ctx complete(StatusCodes.OK, "Not Matched")
-                }
-              }
-              case "5"=>studentActor(context) ! DeleteById(first.id)
-                ctx complete(StatusCodes.OK,"Deleted")
-              case "6"=>studentActor(context) ! Insert(second)
-                ctx complete(StatusCodes.OK,"Inserted")
-              case "7"=>studentActor(context) ! Insert(third)
-                ctx complete(StatusCodes.OK,"Inserted")
               case (x)=>Future {
                 (studentActor(context) ? GetById(x)).mapTo[Student].onComplete {
                   case Success(data) => ctx complete(StatusCodes.OK,data)
@@ -63,6 +54,15 @@ trait RestRoute extends Directives with HttpServiceBase with PlayJsonSupport{
                 }
               }
             }
+      } ~ delete{ctx=>
+        Future {
+          (studentActor(context) ? GetById(input)).mapTo[Student].onComplete {
+            case Success(data) =>
+              studentActor(context) ! DeleteById(input)
+              ctx complete(StatusCodes.OK,"Deleted")
+            case Failure(err) => ctx complete(StatusCodes.OK, "Not Matched")
+          }
+        }
       }
     }
   }

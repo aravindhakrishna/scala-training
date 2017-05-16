@@ -16,8 +16,9 @@ class RepoActor(studentRepo:StudentRepoT) extends Actor with ActorLogging{
         case None=> sender() ! "No Match Found"
       }
       println("sent data")
-    case DeleteById(id) =>studentRepo.delete(id)
-
+    case DeleteById(id) =>
+      studentRepo.delete(id)
+      sender() ! "Inserted"
     case  "all"=> sender() ! studentRepo.getAll.toList
       println("sent")
 
