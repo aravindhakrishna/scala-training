@@ -3,23 +3,27 @@ package com.scala.training.actors
 
 import akka.actor._
 import com.scala.training.domain._
-import com.scala.training.repo.{StudentRepoT}
+import com.scala.training.repo.{EmployeeRepoT}
 
-class RepoActor(studentRepo:StudentRepoT) extends Actor with ActorLogging{
-  def receive ={
-    case Insert(student)=>
-      studentRepo.insert(student)
-      println("Inserted")
+
+
+class RepoActor(employeeRepo:EmployeeRepoT) extends Actor with ActorLogging{
+
+    def receive ={
+    case Insert(employee)=>
+      employeeRepo.insert(employee)
+      println("Employee created")
     case GetById(id) =>
-      studentRepo.get(id) match {
+      employeeRepo.get(id) match {
         case Some(data)=> sender() ! data
         case None=> sender() ! "No Match Found"
       }
-      println("sent data")
-    case DeleteById(id) =>studentRepo.delete(id)
+      println("only one employee data sent ")
+    case DeleteById(id) =>employeeRepo.delete(id)
+      println("Employee deleted")
 
-    case  "all"=> sender() ! studentRepo.getAll.toList
-      println("sent")
+    case  "all"=> sender() ! employeeRepo.getAll.toList
+      println("All employee details sent")
 
 
     case _=>
