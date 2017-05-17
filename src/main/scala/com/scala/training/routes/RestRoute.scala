@@ -3,7 +3,7 @@ package com.scala.training.routes
 import akka.actor.{ActorContext, ActorRef}
 import akka.util.Timeout
 import com.scala.training.domain._
-import com.scala.training.repo.Student
+import com.scala.training.repo.Employee
 import org.bson.types.ObjectId
 import play.api.libs.json.Json
 import spray.http.StatusCodes
@@ -17,47 +17,46 @@ import scala.util.{Failure, Success}
 
 trait RestRoute extends Directives with HttpServiceBase with PlayJsonSupport{
   implicit val timeout=Timeout(5000L)
-  implicit val _marshall=Json.writes[Student]
+  implicit val _marshall=Json.writes[Employee]
   val uuid=ObjectId.get().toString
 
-  val first=Student(id=uuid ,name = "xxx",age = 25,bloodGroup = "AB+",position = "BE")
+  val first=Employee(id=uuid ,name = "Krishna",role= "Developer",department="Digital",project="Viridity",age=24)
+  val second=Employee(name = "yuva",role= "Developer",department="Digital",project="Vpower",age=26)
+  val temp=Employee(name="Thara",role="QA",department="SAP",project="SFL",age=25)
+  def third=Employee(name = "priya"+uuid.codePointCount(3,10),role="QA",department="ABAP",project="SFL",age=23)
 
-  val second=Student(name = "yyy",age = 25,bloodGroup = "AB+",position = "BE")
+  def employeeActor(context:ActorContext)=context.child("emp-repo").getOrElse(context.system.deadLetters)
 
-  def third=Student(name = "y"+uuid.codePointCount(3,10),age = 25,bloodGroup = "AB+",position = "BE")
-
-  def studentActor(context:ActorContext)=context.child("student-repo").getOrElse(context.system.deadLetters)
-
-  def testRoute(context:ActorContext)(implicit executionContext: ExecutionContext) =  (pathPrefix("test")){
+  def testRoute(context:ActorContext)(implicit executionContext: ExecutionContext) =  (pathPrefix("base")){
     pathEndOrSingleSlash{
      get{
        complete(StatusCodes.OK,"hello")
       }
-    } ~  pathPrefix("rest"/Segment){input=>
+    } ~  pathPrefix("next"/Segment){input=>
       get{ctx=>
             input match {
-              case "2"=> studentActor(context) ! Insert(first)
+              case "a"=> employeeActor(context) ! Insert(first)
                 ctx complete(StatusCodes.OK,"Inserted")
-              case "3"=>Future {
-                (studentActor(context) ? "all").mapTo[List[Student]].onComplete {
+              case "b"=>Future {
+                (employeeActor(context) ? "all").mapTo[List[Employee]].onComplete {
                   case Success(data) => ctx complete(StatusCodes.OK,data)
                   case Failure(err) => ctx complete(StatusCodes.OK, "Empty")
                 }
               }
-              case "4"=>Future {
-                (studentActor(context) ? GetById(uuid)).mapTo[Student].onComplete {
+              case "c"=>Future {
+                (employeeActor(context) ? GetById(uuid)).mapTo[Employee].onComplete {
                   case Success(data) => ctx complete(StatusCodes.OK,data)
                   case Failure(err) => ctx complete(StatusCodes.OK, "Not Matched")
                 }
               }
-              case "5"=>studentActor(context) ! DeleteById(first.id)
+              case "d"=>employeeActor(context) ! DeleteById(first.id)
                 ctx complete(StatusCodes.OK,"Deleted")
-              case "6"=>studentActor(context) ! Insert(second)
+              case "e"=>employeeActor(context) ! Insert(second)
                 ctx complete(StatusCodes.OK,"Inserted")
-              case "7"=>studentActor(context) ! Insert(third)
+              case "f"=>employeeActor(context) ! Insert(third)
                 ctx complete(StatusCodes.OK,"Inserted")
               case (x)=>Future {
-                (studentActor(context) ? GetById(x)).mapTo[Student].onComplete {
+                (employeeActor(context) ? GetById(x)).mapTo[Employee].onComplete {
                   case Success(data) => ctx complete(StatusCodes.OK,data)
                   case Failure(err) => ctx complete(StatusCodes.OK, "Not Matched")
                 }
