@@ -3,7 +3,7 @@ package com.scala.training
 import akka.actor.{ActorSystem, Props}
 import com.mongodb.casbah.{MongoClient, MongoClientURI}
 import com.scala.training.actors.{WebServiceActor}
-import com.scala.training.repo.MongoStudentRepo
+import com.scala.training.repo.MongoEmployeeRepo
 import com.scala.training.utils.BootstrapEmbeddedMongo
 import com.typesafe.config.ConfigFactory
 
@@ -23,8 +23,8 @@ object Main extends App with BootstrapEmbeddedMongo{
   startupMongo()
 
   mongoClient=MongoClient(MongoClientURI(settings.dbUrl))
-  val studentRepo=new MongoStudentRepo(mongoClient,DBName,settings.dbTable)
-  system.actorOf(Props(new WebServiceActor(settings.host,settings.port,studentRepo)),"external-host")
+  val employeeRepo=new MongoEmployeeRepo(mongoClient,DBName,settings.dbTable)
+  system.actorOf(Props(new WebServiceActor(settings.host,settings.port,employeeRepo)),"web-host")
 
 
   sys.addShutdownHook{
