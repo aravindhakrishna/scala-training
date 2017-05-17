@@ -6,22 +6,22 @@ import com.novus.salat.annotations.Key
 import com.scala.training.domain._
 import org.bson.types.ObjectId
 
-
-case class Student(@Key("_id") id:String=ObjectId.get().toString,
-                   name:String,
-                   age:Int,
-                   bloodGroup:String,
-                   position:String)
-
-trait StudentRepoT extends Repository{
+case class Employee(
+                     @Key("_id") id:String=ObjectId.get().toString,
+                     name:String,
+                     role:String,
+                     department:String,
+                     project:String,
+                     age:Int
+                   )
+trait EmployeeRepoT extends Repository{
   type Id =String
-  type Entity =Student
-  type PartialEntity = Student
+  type Entity =Employee
+  type PartialEntity = Employee
 }
-
-class MongoStudentRepo(val mongoClient: MongoClient,
-                             val dbName: String,
-                             val collectionName: String)(implicit val context: Context, val idManifest: Manifest[String], val entityManifest: Manifest[Student],
-                                                         val partialEntityManifest: Manifest[Student]) extends SalatRepository with StudentRepoT {
-  override def id(entity: Student): String = entity.id
+class MongoEmployeeRepo(val mongoClient: MongoClient,
+                        val dbName: String,
+                        val collectionName: String)(implicit val context: Context, val idManifest: Manifest[String], val entityManifest: Manifest[Employee],
+                                                    val partialEntityManifest: Manifest[Employee]) extends SalatRepository with EmployeeRepoT {
+  override def id(entity: Employee): String = entity.id
 }
