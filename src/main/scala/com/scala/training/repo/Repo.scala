@@ -13,7 +13,7 @@ case class Employee(
                      department:String,
                      project:String,
                      age:Int
-                   )
+                   ) extends Model
 trait EmployeeRepoT extends Repository{
   type Id =String
   type Entity =Employee
