@@ -15,7 +15,7 @@ import scala.concurrent.{Future, ExecutionContext}
 import scala.util.{Failure, Success}
 
 
-trait RestRoute extends Directives with HttpServiceBase with PlayJsonSupport{
+trait EmployeeRoute extends Directives with HttpServiceBase with PlayJsonSupport{
   implicit val timeout=Timeout(5000L)
   implicit val _marshall=Json.writes[Employee]
   val uuid=ObjectId.get().toString
@@ -23,7 +23,7 @@ trait RestRoute extends Directives with HttpServiceBase with PlayJsonSupport{
   val first=Employee(id=uuid ,name = "Krishna",role= "Developer",department="Digital",project="Viridity",age=24)
   val second=Employee(name = "yuva",role= "Developer",department="Digital",project="Vpower",age=26)
   val temp=Employee(name="Thara",role="QA",department="SAP",project="SFL",age=25)
-  def third=Employee(name = "priya"+uuid.codePointCount(3,10),role="QA",department="ABAP",project="SFL",age=23)
+  def third=Employee(name = "priya"+uuid.codePointCount(4,8),role="QA",department="ABAP",project="SFL",age=23)
 
   def employeeActor(context:ActorContext)=context.child("emp-repo").getOrElse(context.system.deadLetters)
 
@@ -36,9 +36,9 @@ trait RestRoute extends Directives with HttpServiceBase with PlayJsonSupport{
       get{ctx=>
             input match {
               case "a"=> employeeActor(context) ! Insert(first)
-                ctx complete(StatusCodes.OK,"Inserted")
+                ctx complete(StatusCodes.OK," One Employee created")
               case "b"=>Future {
-                (employeeActor(context) ? "all").mapTo[List[Employee]].onComplete {
+                (employeeActor(context) ? "Show all Emplyee Details").mapTo[List[Employee]].onComplete {
                   case Success(data) => ctx complete(StatusCodes.OK,data)
                   case Failure(err) => ctx complete(StatusCodes.OK, "Empty")
                 }
@@ -46,19 +46,19 @@ trait RestRoute extends Directives with HttpServiceBase with PlayJsonSupport{
               case "c"=>Future {
                 (employeeActor(context) ? GetById(uuid)).mapTo[Employee].onComplete {
                   case Success(data) => ctx complete(StatusCodes.OK,data)
-                  case Failure(err) => ctx complete(StatusCodes.OK, "Not Matched")
+                  case Failure(err) => ctx complete(StatusCodes.OK, "Not Found an Employee")
                 }
               }
               case "d"=>employeeActor(context) ! DeleteById(first.id)
-                ctx complete(StatusCodes.OK,"Deleted")
+                ctx complete(StatusCodes.OK,"One Employee Deleted")
               case "e"=>employeeActor(context) ! Insert(second)
-                ctx complete(StatusCodes.OK,"Inserted")
+                ctx complete(StatusCodes.OK,"One Employee created")
               case "f"=>employeeActor(context) ! Insert(third)
-                ctx complete(StatusCodes.OK,"Inserted")
+                ctx complete(StatusCodes.OK,"One Employee created")
               case (x)=>Future {
                 (employeeActor(context) ? GetById(x)).mapTo[Employee].onComplete {
                   case Success(data) => ctx complete(StatusCodes.OK,data)
-                  case Failure(err) => ctx complete(StatusCodes.OK, "Not Matched")
+                  case Failure(err) => ctx complete(StatusCodes.OK, "Not found an Employee")
                 }
               }
             }
