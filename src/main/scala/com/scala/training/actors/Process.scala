@@ -7,7 +7,7 @@ import com.scala.training.repo.{EmployeeRepoT}
 
 
 
-class RepoActor(employeeRepo:EmployeeRepoT) extends Actor with ActorLogging{
+class EmployeeRepoActor(employeeRepo:EmployeeRepoT) extends Actor with ActorLogging{
 
     def receive ={
     case Insert(employee)=>
@@ -22,7 +22,7 @@ class RepoActor(employeeRepo:EmployeeRepoT) extends Actor with ActorLogging{
     case DeleteById(id) =>employeeRepo.delete(id)
       println("Employee deleted")
 
-    case  "all"=> sender() ! employeeRepo.getAll.toList
+    case  "Show all Emplyee Details"=> sender() ! employeeRepo.getAll.toList
       println("All employee details sent")
 
 
