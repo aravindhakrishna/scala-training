@@ -23,8 +23,10 @@ object Main extends App with BootstrapEmbeddedMongo{
   startupMongo()
 
   mongoClient=MongoClient(MongoClientURI(settings.dbUrl))
-  val employeeRepo=new MongoEmployeeRepo(mongoClient,DBName,settings.dbTable)
-  system.actorOf(Props(new WebServiceActor(settings.host,settings.port,employeeRepo)),"web-host")
+  val employeeRepo=new MongoEmployeeRepo(mongoClient,DBName,"employ")
+  val bankRepo=new MongoEmployeeRepo(mongoClient,DBName,"bank_details")
+  val customerRepo=new MongoEmployeeRepo(mongoClient,DBName,"cust_details")
+  system.actorOf(Props(new WebServiceActor(settings.host,settings.port,employeeRepo, bankRepo,customerRepo)),"web-host")
 
 
   sys.addShutdownHook{
