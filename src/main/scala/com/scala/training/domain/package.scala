@@ -4,14 +4,17 @@ import com.scala.training.repo.Employee
 
 
 package object domain {
+  trait  Model
 
 
 
-  case class Insert(empolyee: Employee)
+  case class Insert(model: Model)
+
 
   case class GetById(id:String)
 
   case class DeleteById(id:String)
 
-  case class Results(employees:List[Employee])
+  case class Results(models:List[Model])
+
 }
