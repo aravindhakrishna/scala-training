@@ -2,12 +2,12 @@ package com.scala.training
 
 import akka.actor.{ActorSystem, Props}
 import com.mongodb.casbah.{MongoClient, MongoClientURI}
-import com.scala.training.actors.{WebServiceActor}
-import com.scala.training.repo.MongoEmployeeRepo
+import com.scala.training.actors.WebServiceActor
+import com.scala.training.repo.{MongoBankRepo, MongoCustomerRepo, MongoEmployeeRepo}
 import com.scala.training.utils.BootstrapEmbeddedMongo
 import com.typesafe.config.ConfigFactory
-
 import com.novus.salat.global._
+
 import scala.io.StdIn
 
 
@@ -24,8 +24,8 @@ object Main extends App with BootstrapEmbeddedMongo{
 
   mongoClient=MongoClient(MongoClientURI(settings.dbUrl))
   val employeeRepo=new MongoEmployeeRepo(mongoClient,DBName,"employ")
-  val bankRepo=new MongoEmployeeRepo(mongoClient,DBName,"bank_details")
-  val customerRepo=new MongoEmployeeRepo(mongoClient,DBName,"cust_details")
+  val bankRepo=new MongoBankRepo(mongoClient,DBName,"bank_details")
+  val customerRepo=new MongoCustomerRepo(mongoClient,DBName,"cust_details")
   system.actorOf(Props(new WebServiceActor(settings.host,settings.port,employeeRepo, bankRepo,customerRepo)),"web-host")
 
 
