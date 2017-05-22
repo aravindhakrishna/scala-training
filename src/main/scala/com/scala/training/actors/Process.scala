@@ -3,14 +3,14 @@ package com.scala.training.actors
 
 import akka.actor._
 import com.scala.training.domain._
-import com.scala.training.repo.{EmployeeRepoT}
+import com.scala.training.repo.{Employee, EmployeeRepoT}
 
 
 
 class EmployeeRepoActor(employeeRepo:EmployeeRepoT) extends Actor with ActorLogging{
 
     def receive ={
-    case Insert(employee)=>
+    case Insert(employee:Employee)=>
       employeeRepo.insert(employee)
       println("Employee created")
     case GetById(id) =>
@@ -22,7 +22,7 @@ class EmployeeRepoActor(employeeRepo:EmployeeRepoT) extends Actor with ActorLogg
     case DeleteById(id) =>employeeRepo.delete(id)
       println("Employee deleted")
 
-    case  "Show all Emplyee Details"=> sender() ! employeeRepo.getAll.toList
+    case  "Show all Employee Details"=> sender() ! employeeRepo.getAll.toList
       println("All employee details sent")
 
 
