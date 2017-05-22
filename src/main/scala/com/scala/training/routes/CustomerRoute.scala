@@ -9,6 +9,7 @@ import play.api.libs.json.Json
 import spray.http.StatusCodes
 import spray.httpx.PlayJsonSupport
 import spray.routing.{Directives, HttpServiceBase}
+import akka.pattern.ask
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -17,16 +18,9 @@ import scala.util.{Failure, Success}
   * Created by krishnaveni.n on 05/18/2017.
   */
 trait CustomerRoute extends Directives with HttpServiceBase with PlayJsonSupport{
-  implicit val timeout=Timeout(5000L)
-  implicit val _marshall=Json.writes[Customer]
-  val uuid=ObjectId.get().toString
-
-
-
-  val cust1=Customer(id=uuid ,name = "Symscribe",country="US",Domain = "Angular & Nodejs")
-  val cust2=Customer(name = "Rico",country= "UK", Domain = "Angular & Asp.net")
-  val cust3=Customer(name = "Viridity",country="UK",Domain = "Angular & Akka")
-  def cust4=Customer(name = "VPower"+uuid.codePointCount(4,8),country="Sweden",Domain = "Angular & Scala")
+  implicit val timeout2=Timeout(5000L)
+  implicit val _marshall2=Json.writes[Customer]
+implicit  val _unmarshall2=Json.reads[Customer]
 
   def customerActor(context:ActorContext)=context.child("cust-repo").getOrElse(context.system.deadLetters)
 
@@ -35,40 +29,43 @@ trait CustomerRoute extends Directives with HttpServiceBase with PlayJsonSupport
       get{
         complete(StatusCodes.OK,"hello")
       }
-    } ~  pathPrefix("next"/Segment){input=>
-      get{ctx=>
+    } ~ pathPrefix("customer") {
+      pathEndOrSingleSlash {
+        entity(as[Customer]) { data =>
+          post { ctx =>
+            customerActor(context) ! Insert(data.copy(id = ObjectId.get().toString))
+            ctx.complete(StatusCodes.OK, "Customer Created")
+          }
+
+        }
+      }
+
+    } ~ pathPrefix("customer" / Segment) { input =>
+      get { ctx =>
         input match {
-          case "1"=> customerActor(context) ! Insert(cust1)
-            ctx complete(StatusCodes.OK," One Customer created")
-          case "2"=>Future {
+          case "Show all Customer Details" => Future {
             (customerActor(context) ? "Show all Customer Details").mapTo[List[Customer]].onComplete {
-              case Success(data) => ctx complete(StatusCodes.OK,data)
+              case Success(data) => ctx complete(StatusCodes.OK, data)
               case Failure(err) => ctx complete(StatusCodes.OK, "Empty")
             }
           }
-          case "3"=>Future {
-            (customerActor(context) ? GetById(uuid)).mapTo[Customer].onComplete {
-              case Success(data) => ctx complete(StatusCodes.OK,data)
-              case Failure(err) => ctx complete(StatusCodes.OK, "Not Found an Customer")
+          case (x) => Future {
+            (customerActor(context) ? GetById(x)).mapTo[Customer].onComplete {
+              case Success(data) => ctx complete(StatusCodes.OK, data)
+              case Failure(err) => ctx complete(StatusCodes.OK, "Not found any Customer ")
             }
           }
-          case "4"=>customerActor(context) ! DeleteById(cust1.id)
-            ctx complete(StatusCodes.OK,"One Customer Deleted")
-          case "5"=>customerActor(context) ! Insert(cust2)
-            ctx complete(StatusCodes.OK,"One Customer created")
-          case "6"=>customerActor(context) ! Insert(cust2)
-            ctx complete(StatusCodes.OK,"One Customer created" )
-          case "7"=>customerActor(context) ! Insert(cust4)
-            ctx complete(StatusCodes.OK,"One Customer created")
-          case (x)=>Future {
-            (customerActor(context) ? GetById(x)).mapTo[Customer].onComplete {
-              case Success(data) => ctx complete(StatusCodes.OK,data)
-              case Failure(err) => ctx complete(StatusCodes.OK, "Not found the Customer")
-            }
+        }
+      } ~ delete { ctx =>
+        Future {
+          (customerActor(context) ? GetById(input)).mapTo[Customer].onComplete {
+            case Success(data) =>
+              customerActor(context) ! DeleteById(input)
+              ctx complete(StatusCodes.OK, "Deleted")
+            case Failure(err) => ctx complete(StatusCodes.OK, "Not found any Customer ")
           }
         }
       }
     }
   }
 }
-
