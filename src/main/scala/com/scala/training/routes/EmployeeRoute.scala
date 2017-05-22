@@ -15,55 +15,56 @@ import scala.concurrent.{Future, ExecutionContext}
 import scala.util.{Failure, Success}
 
 
-trait EmployeeRoute extends Directives with HttpServiceBase with PlayJsonSupport{
-  implicit val timeout=Timeout(5000L)
-  implicit val _marshall=Json.writes[Employee]
-  val uuid=ObjectId.get().toString
+trait EmployeeRoute extends Directives with HttpServiceBase with PlayJsonSupport {
+  implicit val timeout = Timeout(5000L)
+  implicit val _marshall = Json.writes[Employee]
+  implicit val _unmarshall = Json.reads[Employee]
 
-  val first=Employee(id=uuid ,name = "Krishna",role= "Developer",department="Digital",project="Viridity",age=24)
-  val second=Employee(name = "yuva",role= "Developer",department="Digital",project="Vpower",age=26)
-  val temp=Employee(name="Thara",role="QA",department="SAP",project="SFL",age=25)
-  def third=Employee(name = "priya"+uuid.codePointCount(4,8),role="QA",department="ABAP",project="SFL",age=23)
 
-  def employeeActor(context:ActorContext)=context.child("emp-repo").getOrElse(context.system.deadLetters)
+  def employeeActor(context: ActorContext) = context.child("emp-repo").getOrElse(context.system.deadLetters)
 
-  def testRoute(context:ActorContext)(implicit executionContext: ExecutionContext) =  (pathPrefix("base")){
-    pathEndOrSingleSlash{
-     get{
-       complete(StatusCodes.OK,"hello")
+  def testRoute(context: ActorContext)(implicit executionContext: ExecutionContext) = (pathPrefix("base")) {
+    pathEndOrSingleSlash {
+      get {
+        complete(StatusCodes.OK, "hello")
       }
-    } ~  pathPrefix("next"/Segment){input=>
-      get{ctx=>
-            input match {
-              case "a"=> employeeActor(context) ! Insert(first)
-                ctx complete(StatusCodes.OK," One Employee created")
-              case "b"=>Future {
-                (employeeActor(context) ? "Show all Emplyee Details").mapTo[List[Employee]].onComplete {
-                  case Success(data) => ctx complete(StatusCodes.OK,data)
-                  case Failure(err) => ctx complete(StatusCodes.OK, "Empty")
-                }
-              }
-              case "c"=>Future {
-                (employeeActor(context) ? GetById(uuid)).mapTo[Employee].onComplete {
-                  case Success(data) => ctx complete(StatusCodes.OK,data)
-                  case Failure(err) => ctx complete(StatusCodes.OK, "Not Found an Employee")
-                }
-              }
-              case "d"=>employeeActor(context) ! DeleteById(first.id)
-                ctx complete(StatusCodes.OK,"One Employee Deleted")
-              case "e"=>employeeActor(context) ! Insert(second)
-                ctx complete(StatusCodes.OK,"One Employee created")
-              case "f"=>employeeActor(context) ! Insert(third)
-                ctx complete(StatusCodes.OK,"One Employee created")
-              case (x)=>Future {
-                (employeeActor(context) ? GetById(x)).mapTo[Employee].onComplete {
-                  case Success(data) => ctx complete(StatusCodes.OK,data)
-                  case Failure(err) => ctx complete(StatusCodes.OK, "Not found an Employee")
-                }
-              }
+    } ~ pathPrefix("employee") {
+      pathEndOrSingleSlash {
+        entity(as[Employee]) { data =>
+          post { ctx =>
+            employeeActor(context) ! Insert(data.copy(id = ObjectId.get().toString))
+            ctx.complete(StatusCodes.OK, "Employee Created")
+          }
+
+        }
+      }
+
+    } ~ pathPrefix("employee" / Segment) { input =>
+      get { ctx =>
+        input match {
+          case "Show all Employee Details" => Future {
+            (employeeActor(context) ? "Show all Employee Details").mapTo[List[Employee]].onComplete {
+              case Success(data) => ctx complete(StatusCodes.OK, data)
+              case Failure(err) => ctx complete(StatusCodes.OK, "Empty")
             }
+          }
+          case (x) => Future {
+            (employeeActor(context) ? GetById(x)).mapTo[Employee].onComplete {
+              case Success(data) => ctx complete(StatusCodes.OK, data)
+              case Failure(err) => ctx complete(StatusCodes.OK, "Not Found an Employee")
+            }
+          }
+        }
+      } ~ delete { ctx =>
+        Future {
+          (employeeActor(context) ? GetById(input)).mapTo[Employee].onComplete {
+            case Success(data) =>
+              employeeActor(context) ! DeleteById(input)
+              ctx complete(StatusCodes.OK, "Employee Deleted")
+            case Failure(err) => ctx complete(StatusCodes.OK, "Not found an Employee")
+          }
+        }
       }
     }
   }
 }
-
