@@ -14,8 +14,6 @@ case class Bank(
                      branch:String,
                      city:String,
                      ifsc_code:String
-
-
                    ) extends Model
 
 trait BankRepoT extends Repository{
@@ -24,7 +22,7 @@ trait BankRepoT extends Repository{
   type PartialEntity = Bank
 }
 
-class MongoCustomerRepo(val mongoClient: MongoClient,
+class MongoBankRepo(val mongoClient: MongoClient,
                         val dbName: String,
                         val collectionName: String)(implicit val context: Context, val idManifest: Manifest[String], val entityManifest: Manifest[Bank],
                                                     val partialEntityManifest: Manifest[Bank]) extends SalatRepository with BankRepoT {
