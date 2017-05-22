@@ -20,13 +20,13 @@ case class Customer(
 
 trait CustomerRepoT extends Repository{
   type Id =String
-  type Entity =Bank
-  type PartialEntity = Bank
+  type Entity =Customer
+  type PartialEntity = Customer
 }
 
 class MongoCustomerRepo(val mongoClient: MongoClient,
                         val dbName: String,
-                        val collectionName: String)(implicit val context: Context, val idManifest: Manifest[String], val entityManifest: Manifest[Bank],
-                                                    val partialEntityManifest: Manifest[Bank]) extends SalatRepository with CustomerRepoT {
-  override def id(entity: Bank): String = entity.id
+                        val collectionName: String)(implicit val context: Context, val idManifest: Manifest[String], val entityManifest: Manifest[Customer],
+                                                    val partialEntityManifest: Manifest[Customer]) extends SalatRepository with CustomerRepoT {
+  override def id(entity: Customer): String = entity.id
 }
