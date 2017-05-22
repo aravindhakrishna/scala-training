@@ -19,58 +19,61 @@ import scala.concurrent.{Future, ExecutionContext}
 import scala.util.{Failure, Success}
 
 
-trait BankRoute extends Directives with HttpServiceBase with PlayJsonSupport{
-  implicit val timeout=Timeout(5000L)
-  implicit val _marshall=Json.writes[Bank]
-  val uuid=ObjectId.get().toString
+trait BankRoute extends Directives with HttpServiceBase with PlayJsonSupport {
+  implicit val timeout1 = Timeout(5000L)
+  implicit val _marshall1 = Json.writes[Bank]
+  implicit val _unmarshall1 = Json.reads[Bank]
 
-  val bank1=Bank(id=uuid ,name = "StateBank",branch= "Pudur",city="Pollachi",ifsc_code="SBI004315")
-  val bank2=Bank(name = "KVB",branch= "Ericinampatti",city="Udumalpet",ifsc_code="KVB003210")
-  val bank3=Bank(name="Syndicate",branch="Kolarpatti",city="Pollachi",ifsc_code="SYN006789")
-  def bank4=Bank(name = "HDFC"+uuid.codePointCount(4,8),branch="PTC",city="Chennai",ifsc_code="HDFC007812")
+  def bankActor(context: ActorContext) = context.child("bank-repo").getOrElse(context.system.deadLetters)
 
-  def bankActor(context:ActorContext)=context.child("bank-repo").getOrElse(context.system.deadLetters)
-
-  def bankRoute(context:ActorContext)(implicit executionContext: ExecutionContext) =  (pathPrefix("bank")){
-    pathEndOrSingleSlash{
-      get{
-        complete(StatusCodes.OK,"hello")
+  def bankRoute(context: ActorContext)(implicit executionContext: ExecutionContext) = (pathPrefix("banking")) {
+    pathEndOrSingleSlash {
+      get {
+        complete(StatusCodes.OK, "hello")
       }
-    } ~  pathPrefix("next"/Segment){input=>
-      get{ctx=>
+    } ~ pathPrefix("bank") {
+      pathEndOrSingleSlash {
+        entity(as[Bank]) { data =>
+          post { ctx =>
+            bankActor(context) ! Insert(data.copy(id = ObjectId.get().toString))
+            ctx.complete(StatusCodes.OK, "Bank Created")
+          }
+
+        }
+      }
+
+    } ~ pathPrefix("bank" / Segment) { input =>
+      get { ctx =>
         input match {
-          case "A"=> bankActor(context) ! Insert(bank1)
-            ctx complete(StatusCodes.OK," One Bank created")
-          case "B"=>Future {
+          case "Show all Bank Details" => Future {
             (bankActor(context) ? "Show all Bank Details").mapTo[List[Bank]].onComplete {
-              case Success(data) => ctx complete(StatusCodes.OK,data)
+              case Success(data) => ctx complete(StatusCodes.OK, data)
               case Failure(err) => ctx complete(StatusCodes.OK, "Empty")
             }
           }
-          case "C"=>Future {
-            (bankActor(context) ? GetById(uuid)).mapTo[Bank].onComplete {
-              case Success(data) => ctx complete(StatusCodes.OK,data)
-              case Failure(err) => ctx complete(StatusCodes.OK, "Not Found an Employee")
+          case (x) => Future {
+            (bankActor(context) ? GetById(x)).mapTo[Bank].onComplete {
+              case Success(data) => ctx complete(StatusCodes.OK, data)
+              case Failure(err) => ctx complete(StatusCodes.OK, "Not Found any Bank")
             }
           }
-          case "D"=>bankActor(context) ! DeleteById(bank1.id)
-            ctx complete(StatusCodes.OK,"One Bank Deleted")
-          case "E"=>bankActor(context) ! Insert( bank2)
-            ctx complete(StatusCodes.OK,"One Bank created")
-          case "F"=>bankActor(context) ! Insert( bank3)
-            ctx complete(StatusCodes.OK,"One Bank created")
-          case "G"=>bankActor(context) ! Insert(bank4)
-            ctx complete(StatusCodes.OK,"One Bank created")
-          case (x)=>Future {
-            (bankActor(context) ? GetById(x)).mapTo[Bank].onComplete {
-              case Success(data) => ctx complete(StatusCodes.OK,data)
-              case Failure(err) => ctx complete(StatusCodes.OK, "Not found any Bank")
-            }
+        }
+
+      } ~ delete { ctx =>
+        Future {
+          (bankActor(context) ? GetById(input)).mapTo[Bank].onComplete {
+            case Success(data) =>
+              bankActor(context) ! DeleteById(input)
+              ctx complete(StatusCodes.OK, "Deleted")
+            case Failure(err) => ctx complete(StatusCodes.OK, "Not found any bank")
           }
         }
       }
     }
   }
+
 }
+
+
 
 
